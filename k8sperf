@@ -1,0 +1,54 @@
+import requests
+import os
+import subprocess as sp
+import socket
+import time
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient, __version__
+
+def upload():
+
+  connect_str = "DefaultEndpointsProtocol=https;AccountName=ovidiuborlean;AccountKey=KpO95Txf3+7cBsGfA8WtBkFB4G6mYBoTGKRw5po/iMVuN4CjKJ2AwZuw7R0a7uKFf3n/VV5+HweZ9Yq/pafA3w==;EndpointSuffix=core.windows.net"
+  blob_service_client = BlobServiceClient.from_connection_string(connect_str)
+  blob_client = blob_service_client.get_blob_client(container="logs", blob="messages")
+  with open("/var/log/messages", "rb") as data:
+    blob_client.upload_blob(data)
+
+
+#print("\nUploading to Azure Storage as blob:\n\t" + local_file_name)
+
+
+
+def kubelet_check():
+  kubelet_check = sp.getoutput("service kubelet status | grep running")
+  if "running" in kubelet_check:
+    print ("Kubelet is running")
+  else:
+    print ("Kublet Failure")
+
+def network_check(host):
+  settings = {}
+  ports = [9000, 1192, 443, 10250]
+  settings["timeout"] = 5
+  settings["port"] = 1192
+  connected = False
+  for n in ports:
+     try:
+       tsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+       tsock.settimeout(settings['timeout'])
+       print("Checking connectivity to: ", n)
+       tsock.connect((host, n))
+       connected = True
+       print("Success")
+       tsock.shutdown(socket.SHUT_RDWR)
+       tsock.close()
+       time.sleep(1)
+     except ConnectionRefusedError:
+       print('Error Refused')
+       time.sleep(1)
+     except:
+       print("Network Failure")
+       time.sleep(1)
+if __name__ == '__main__':
+  upload()
+  #kubelet_check()
+  #network_check("aks-aks-aa1792-2b26b80f.hcp.westeurope.azmk8s.io")
