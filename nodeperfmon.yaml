@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    component: nodeperfmon
+  name: nodeperfmon
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      component: nodeperfmon
+      tier: node
+  template:
+    metadata:
+      labels:
+        component: nodeperfmon
+        tier: node
+    spec:
+      #nodeName: $nodeName
+      containers:
+        - command:
+            - nsenter
+            - --target
+            - "1"
+            - --mount
+            - --uts
+            - --ipc
+            - --net
+            - --pid
+            - --
+            - sh
+            - -c
+            - |
+              cd /tmp
+              git clone https://github.com/OvidiuBorlean/nodeperfmon
+              cd nodeperfmon
+              chmod +x ./cpucheck.sh
+              chmod +x ./memcheck.sh
+              echo "Installing Python Libraries"
+              apt install python3-pip -y
+              pip3 install azure.storage.blob
+              sudo python3 /tmp/nodeperfmon/nodeperfmon.py
+              sleep 600
+          image: alpine
+          env:
+          - name: CONN_STR
+            value: "DefaultEndpointsProtocol=https;AccountName=ovidiuborlean;AccountKey=eD2H0KoImC1ZumdQu8bp+PP19cVKq11TLzGUhfbcDOjvCO2Mm8Zf69rmr7I1uDy9KRN2XiPTKkFA+AStiJ0tdQ==;EndpointSuffix=core.windows.net"
+          - name: CPU_MAX
+            value: "85"
+          - name: MEM_MAX
+            value: "85"
+          
+          imagePullPolicy: IfNotPresent
+          name: disable-node-exporter-service
+          resources:
+            requests:
+              cpu: 10m
+          securityContext:
+            privileged: true
+      hostPID: true
+      nodeSelector:
+        kubernetes.io/os: linux
+      tolerations:
+        - effect: NoSchedule
+          operator: Exists
+      restartPolicy: Always
+  updateStrategy:
+    type: OnDelete
