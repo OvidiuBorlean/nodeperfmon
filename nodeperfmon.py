@@ -110,11 +110,10 @@ def network_check(host, port):
     print("Generate Report")
     init_report()
 
-if __name__ == '__main__':
-  print ("Starting Monitor")
-  with open("/tmp/aksreport.logs", "a") as logs:
-    logs.write("Main Function")
-  while (True):
-    network_check("127.0.0.1", 10250)
-    perfmon()
-    time.sleep(GLOBAL_DELAY)
+print ("Starting Monitor")
+with open("/tmp/aksreport.logs", "a") as logs:
+  logs.write("Main Function")
+while (True):
+  network_check("127.0.0.1", 10250)
+  perfmon()
+  time.sleep(GLOBAL_DELAY)
