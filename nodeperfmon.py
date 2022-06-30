@@ -15,7 +15,7 @@ def init_report():
     CONN_STR = os.environ.get('CONN_STR')
   else:
     print ("Azure Storage - Connection String Not found in Environment. Please add to upload report.. Using default")
-    CONN_STR = "DefaultEndpointsProtocol=https;AccountName=akslogsovidiu;AccountKey=c5Ep4XDliYkGp6upLgkQQqruaTPwR5SNFHp1WGcfq1kGQEAmaaIKNz4F73KIXG36T596RR4ScKN++AStDhinMQ==;EndpointSuffix=core.windows.net"
+    CONN_STR = "your connection string"
   now = datetime.now()
   # Getting current date/time from environment
   dt_string = now.strftime("%d-%m-%Y %H:%M:%S")
@@ -32,7 +32,7 @@ def init_report():
   # Getting last 10 min logs from Journal
   journal = sp.getoutput('journalctl --since "10 min ago"')
   # Creating report file and adding the previous commands output
-  with open("/tmp/aksreport", "a") as f:
+  with open("/tmp/aksreport", "w") as f:
     f.write(cpu_report)
     f.write("\n")
     f.write("------------------------------------------")
