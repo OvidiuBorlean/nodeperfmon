@@ -111,8 +111,8 @@ def network_check(host, port):
   if not connected:
     print("Generate Report")
     init_report()
-
-  while (True):
-  network_check("127.0.0.1", 10250)
-  perfmon()
-  time.sleep(GLOBAL_DELAY)
+print("Starting Up")
+while (True):
+network_check("127.0.0.1", 10250)
+perfmon()
+time.sleep(GLOBAL_DELAY)
