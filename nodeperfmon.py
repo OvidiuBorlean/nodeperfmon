@@ -26,7 +26,7 @@ else:
 if 'MEM_MAX' in os.environ:
   MEM_MAX = os.environ.get('MEM_MAX')
 else:
-  MEM_MAX = float(90)
+  MEM_MAX = float(3)
 
 
 def init_report():
