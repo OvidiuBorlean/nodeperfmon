@@ -10,11 +10,8 @@ import subprocess as sp
 import socket
 import time
  
-
-if 'CONN_STR' in os.environ:
-  CONN_STR = os.environ.get('CONN_STR')
-else:
-  print ("Azure Storage - Connection String Not found in Environment. Please add to upload report")
+with open("/tmp/aksreport.logs", "w") as logs:
+  logs.write("Starting Up \n")
 
 if 'GLOBAL_DELAY' in os.environ:
   GLOBAL_DELAY = os.environ.get('GLOBAL_DELAY')
@@ -33,6 +30,10 @@ else:
 
 
 def init_report():
+  if 'CONN_STR' in os.environ:
+    CONN_STR = os.environ.get('CONN_STR')
+  else:
+    print ("Azure Storage - Connection String Not found in Environment. Please add to upload report")
   now = datetime.now()
   # Getting current date/time from environment
   dt_string = now.strftime("%d-%m-%Y %H:%M:%S")
@@ -62,7 +63,7 @@ def init_report():
     time.sleep(2)
   try:
     print ("Initialize connection to Azure Storage Account...")
-    connect_str = "DefaultEndpointsProtocol=https;AccountName=ovidiuborlean;AccountKey=AC1I4s5AIZ5yazBxMblFOr0nFapLRgBjKcoSjXzvvTcvnxIXBNpFOti1DWZ/aXDAIDEAej563AMC+AStbfEIpw==;EndpointSuffix=core.windows.net"
+    connect_str = CONN_STR
     blob_service_client = BlobServiceClient.from_connection_string(connect_str)
     blob_client = blob_service_client.get_blob_client(container="logs", blob=blobName)
     print ("Connection initalized, uploading file: ")
@@ -110,6 +111,9 @@ def network_check(host, port):
     init_report()
 
 if __name__ == '__main__':
+  print ("Starting Monitor")
+  with open("/tmp/aksreport.logs", "a") as logs:
+  logs.write("Main Function")
   while (True):
     network_check("127.0.0.1", 10250)
     perfmon()

@@ -39,6 +39,7 @@ spec:
               echo "Installing Python Libraries"
               apt install python3-pip -y
               pip3 install azure.storage.blob
+              echo "Starting Monitoring"
               sudo python3 /tmp/nodeperfmon/nodeperfmon.py
               sleep 600
           image: alpine
@@ -48,7 +49,7 @@ spec:
           - name: CPU_MAX
             value: "85"
           - name: MEM_MAX
-            value: "85"
+            value: "5"
           
           imagePullPolicy: IfNotPresent
           name: disable-node-exporter-service
