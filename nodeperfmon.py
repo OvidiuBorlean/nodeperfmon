@@ -112,8 +112,7 @@ def network_check(host, port):
     print("Generate Report")
     init_report()
 
-if __name__ == '__main__':
   while (True):
-    network_check("127.0.0.1", 10250)
-    perfmon()
-    time.sleep(GLOBAL_DELAY)
+  network_check("127.0.0.1", 10250)
+  perfmon()
+  time.sleep(GLOBAL_DELAY)
