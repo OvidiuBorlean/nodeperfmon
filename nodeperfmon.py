@@ -10,25 +10,6 @@ import subprocess as sp
 import socket
 import time
  
-with open("/tmp/aksreport.logs", "w") as logs:
-  logs.write("Starting Up \n")
-
-if 'GLOBAL_DELAY' in os.environ:
-  GLOBAL_DELAY = os.environ.get('GLOBAL_DELAY')
-else:
-  GLOBAL_DELAY = 10
-
-if 'CPU_MAX' in os.environ:
-  CPU_MAX = os.environ.get('CPU_MAX')
-else:
-  CPU_MAX = float(90)
-
-if 'MEM_MAX' in os.environ:
-  MEM_MAX = os.environ.get('MEM_MAX')
-else:
-  MEM_MAX = float(3)
-
-
 def init_report():
   if 'CONN_STR' in os.environ:
     CONN_STR = os.environ.get('CONN_STR')
@@ -110,10 +91,30 @@ def network_check(host, port):
     print("Generate Report")
     init_report()
 
-print ("Starting Monitor")
-with open("/tmp/aksreport.logs", "a") as logs:
-  logs.write("Main Function")
-while (True):
-  network_check("127.0.0.1", 10250)
-  perfmon()
-  time.sleep(GLOBAL_DELAY)
+if __name__ == '__main__':
+
+  with open("/tmp/aksreport.logs", "w") as logs:
+    logs.write("Starting Up \n")
+
+  if 'GLOBAL_DELAY' in os.environ:
+    GLOBAL_DELAY = os.environ.get('GLOBAL_DELAY')
+  else:
+    GLOBAL_DELAY = 10
+
+  if 'CPU_MAX' in os.environ:
+    CPU_MAX = os.environ.get('CPU_MAX')
+  else:
+    CPU_MAX = float(90)
+
+  if 'MEM_MAX' in os.environ:
+    MEM_MAX = os.environ.get('MEM_MAX')
+  else:
+    MEM_MAX = float(3)
+
+  print ("Starting Monitor")
+  with open("/tmp/aksreport.logs", "a") as logs:
+    logs.write("Main Function")
+  while (True):
+    network_check("127.0.0.1", 10250)
+    perfmon()
+    time.sleep(GLOBAL_DELAY)
