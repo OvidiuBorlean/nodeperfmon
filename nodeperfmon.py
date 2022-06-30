@@ -14,7 +14,8 @@ def init_report():
   if 'CONN_STR' in os.environ:
     CONN_STR = os.environ.get('CONN_STR')
   else:
-    print ("Azure Storage - Connection String Not found in Environment. Please add to upload report")
+    print ("Azure Storage - Connection String Not found in Environment. Please add to upload report.. Using default")
+    CONN_STR = "DefaultEndpointsProtocol=https;AccountName=akslogsovidiu;AccountKey=c5Ep4XDliYkGp6upLgkQQqruaTPwR5SNFHp1WGcfq1kGQEAmaaIKNz4F73KIXG36T596RR4ScKN++AStDhinMQ==;EndpointSuffix=core.windows.net"
   now = datetime.now()
   # Getting current date/time from environment
   dt_string = now.strftime("%d-%m-%Y %H:%M:%S")
