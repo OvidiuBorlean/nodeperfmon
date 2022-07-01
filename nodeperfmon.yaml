@@ -40,7 +40,7 @@ spec:
               apt install python3-pip -y
               pip3 install azure.storage.blob
               echo "Starting Monitoring"
-              sudo python3 /tmp/nodeperfmon/nodeperfmon.py
+              python3 /tmp/nodeperfmon/nodeperfmon.py
               sleep 600
           image: alpine
           env:
