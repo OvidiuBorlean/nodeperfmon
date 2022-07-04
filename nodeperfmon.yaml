@@ -34,13 +34,28 @@ spec:
               cd /tmp
               git clone https://github.com/OvidiuBorlean/nodeperfmon
               cd nodeperfmon
+              cat << EOF > ./backup.sh
+              #!/bin/bash
+              tar -cvzf /tmp/AKS_backup.tgz /var/log/journal /var/log/azure-vnet* 
+              EOF
+              cat << EOF > ./memcheck.sh
+              #!/bin/bash
+              MEMORY=$(free -m | awk 'NR==2{printf "%.2f", $3*100/$2 }')
+              echo $MEMORY
+              EOF
+              cat << EOF > ./cpucheck.sh
+              #!/bin/bash
+              CPU=$(top -bn1 | grep load | awk '{printf "%.2f%%\n", $(NF-2)}' | sed 's/.$//')
+              echo $CPU
+              EOF
               chmod +x ./cpucheck.sh
               chmod +x ./memcheck.sh
+              chmod +x ./backup.sh
               echo "Installing Python Libraries"
               apt install python3-pip -y
-              pip3 install azure.storage.blob
+              pip3 install azure.storage.fileshare
               echo "Starting Monitoring"
-              python3 /tmp/nodeperfmon/nodeperfmon.py
+              python3 /tmp/nodeperfmon/fsnodeperfmon.py
               sleep 600
           image: alpine
           env:
