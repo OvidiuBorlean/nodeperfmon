@@ -4,7 +4,7 @@
 #from xml.etree.ElementTree import TreeBuilder
 #from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient, __version__
 
-from azure.storage.fileshare import ShareServiceClient
+#from azure.storage.fileshare import ShareServiceClient
 from azure.storage.fileshare import ShareFileClient
 from os.path import exists
 from datetime import datetime
@@ -33,6 +33,7 @@ def upload(fileName):
   # Generate the FileShare name by merging hostname and date/time
   #shareName = hostName + "_" + dt_string
   #service = ShareServiceClient(account_url=storage_accout, credential=account_key)
+  conn_str = os.environ.get('CONN_STR')
   file_client = ShareFileClient.from_connection_string(conn_str=conn_str, share_name="logs", file_path=hostName)
   with open(fileName, "rb") as source_file:
     file_client.upload_file(source_file)

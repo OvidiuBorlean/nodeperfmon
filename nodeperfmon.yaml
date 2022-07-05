@@ -40,6 +40,7 @@ spec:
               EOF
               chmod +x ./backup.sh
               echo "Installing Python Libraries"
+              apt update
               apt install python3-pip -y
               pip3 install azure-storage-file-share
               pip3 install psutil
