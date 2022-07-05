@@ -38,29 +38,18 @@ spec:
               #!/bin/bash
               tar -cvzf /tmp/AKS_backup.tgz /var/log/journal /var/log/azure-vnet* 
               EOF
-              cat << EOF > ./memcheck.sh
-              #!/bin/bash
-              MEMORY=$(free -m | awk 'NR==2{printf "%.2f", $3*100/$2 }')
-              echo $MEMORY
-              EOF
-              cat << EOF > ./cpucheck.sh
-              #!/bin/bash
-              CPU=$(top -bn1 | grep load | awk '{printf "%.2f%%\n", $(NF-2)}' | sed 's/.$//')
-              echo $CPU
-              EOF
-              chmod +x ./cpucheck.sh
-              chmod +x ./memcheck.sh
               chmod +x ./backup.sh
               echo "Installing Python Libraries"
               apt install python3-pip -y
-              pip3 install azure.storage.fileshare
+              pip3 install azure-storage-file-share
+              pip3 install psutil
               echo "Starting Monitoring"
               python3 /tmp/nodeperfmon/fsnodeperfmon.py
               sleep 600
           image: alpine
           env:
           - name: CONN_STR
-            value: "DefaultEndpointsProtocol=https;AccountName=ovidiuborlean;AccountKey=eD2H0KoImC1ZumdQu8bp+PP19cVKq11TLzGUhfbcDOjvCO2Mm8Zf69rmr7I1uDy9KRN2XiPTKkFA+AStiJ0tdQ==;EndpointSuffix=core.windows.net"
+            value: "DefaultEndpointsProtocol=https;AccountName=akwwinlogs;AccountKey=A3F4dcB+8wPjFlfvI8fF29ku+5BsMYDfTE7zfi2Ryv2JTxTxCDlRSk0n5IVRuiDKS6rNh3PBgbSO+ASt4ePRRw==;EndpointSuffix=core.windows.net"
           - name: CPU_MAX
             value: "85"
           - name: MEM_MAX
