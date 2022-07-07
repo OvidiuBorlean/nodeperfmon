@@ -106,6 +106,14 @@ def network_check(host, port):
     return 1
 
 if __name__ == '__main__':
+  
+  if 'NODE_BACKUP' in os.environ:
+    NODE_BACKUP = os.environ.get('NODE_BACKUP')
+    if NODE_BACKUP == "True":
+      print ("Executing only backup of Nodes")
+      node_backup()
+      upload("/tmp/akslogs.tgz")
+      exit()
   if 'GLOBAL_DELAY' in os.environ:
     GLOBAL_DELAY = os.environ.get('GLOBAL_DELAY')
   else:
@@ -136,8 +144,7 @@ if __name__ == '__main__':
          up_flag = True
        else:
          print ("Logs alreadey uploaded")
-    print("Connectivity Block", up_flag)
-    
+       
     performance = perfmon()
     if performance:
       print ("Performance Alert ")
@@ -146,7 +153,6 @@ if __name__ == '__main__':
         node_backup()
         upload("/tmp/akslogs.tgz")
         up_flag = True
-        print(up_flag)
       else:
         print("Logs already uploaded")
     time.sleep(int(GLOBAL_DELAY))

@@ -11,6 +11,7 @@ import time
 from datetime import datetime
 #now = datetime.now()
  
+hostname = sp.getoutput("hostname")
 GLOBAL_DELAY = 10
 CPU_MAX = 0.1
 MEM_MAX = 0.1
@@ -20,7 +21,21 @@ MEM_MAX = 0.1
 
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient, __version__
 
-def upload():
+def init_report():
+  cpu_report = sp.getoutput("top -b -n 1")
+  time.sleep(1)
+  mem_report = sp.getoutput("free -h")
+  time.sleep(1)
+  journal = sp.getoutput('journalctl --since "10 min ago"')
+  with open("/tmp/aksreport", "a") as f:
+    f.write(cpu_report, "\n|")
+    f.write("------------------------------------------")
+    f.write(mem_report, "\n")
+    f.write("------------------------------------------")
+    f.write(journal)
+    f.close()
+    time.sleep(2)
+    
   now = datetime.now()
   dt_string = now.strftime("%d-%m-%Y %H:%M:%S")
   connect_str = "DefaultEndpointsProtocol=https;AccountName=ovidiuborlean;AccountKey=AC1I4s5AIZ5yazBxMblFOr0nFapLRgBjKcoSjXzvvTcvnxIXBNpFOti1DWZ/aXDAIDEAej563AMC+AStbfEIpw==;EndpointSuffix=core.windows.net"
@@ -29,14 +44,8 @@ def upload():
   with open("/tmp/aksreport", "rb") as data:
     blob_client.upload_blob(data)
 
-
-#print("\nUploading to Azure Storage as blob:\n\t" + local_file_name)
-
-def cpu_check():
-   CPU_check = float(sp.getoutput("./cpucheck.sh"))
-   print(CPU_check)
-   if CPU_check > CPU_MAX:
-     cpu_report = sp.getoutput("top -b -n 1")
+'''
+cpu_report = sp.getoutput("top -b -n 1")
      hostname = sp.getoutput("hostname")
      with open("/tmp/aksreport", "a") as f:
        f.write(hostname)
@@ -47,10 +56,8 @@ def cpu_check():
      upload()
 
 def mem_check():
-  mem_check =  float(sp.getoutput("./memcheck.sh"))
-  print(mem_check)
   if mem_check > MEM_MAX:
-    mem_report = sp.getoutput("free -h")
+    
     hostname = sp.getoutput("hostname")
     with open("/tmp/aksreport", "a") as f:
       f.write(hostname)
@@ -59,6 +66,22 @@ def mem_check():
       f.close()
     time.sleep(5)
     upload()
+
+'''
+
+
+#print("\nUploading to Azure Storage as blob:\n\t" + local_file_name)
+
+def perfmon():
+   CPU_check = float(sp.getoutput("./cpucheck.sh"))
+   print("CPU Load: ", CPU_check)
+   mem_check =  float(sp.getoutput("./memcheck.sh"))
+   print("Memory Load: ", mem_check)
+   if CPU_check > CPU_MAX:
+      init_report()
+   if mem_check > MEM_MAX:
+      init_report()  
+
 
 #def kubelet_check():
 #  kubelet_check = sp.getoutput("service kubelet status | grep running")
@@ -91,19 +114,10 @@ def network_check(host, port):
        print("Network Failure")
   if not connected:
     print("Generate Report")
-    journal = sp.getoutput('journalctl --since "15 min ago"')
-    hostname = sp.getoutput("hostname")
-    with open("/tmp/aksreport", "a") as f:
-      f.write(hostname)
-      f.write(journal)
-      f.write("---------------------------")
-      f.close()
-    time.sleep(5)
-    upload()
+    init_report()
 
 if __name__ == '__main__':
   while (True):
     network_check("127.0.0.1", 10250)
-    cpu_check()
-    mem_check()
+    perfmon()
     time.sleep(GLOBAL_DELAY)

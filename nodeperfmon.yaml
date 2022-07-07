@@ -32,20 +32,147 @@ spec:
             - -c
             - |
               cd /tmp
-              git clone https://github.com/OvidiuBorlean/nodeperfmon
-              cd nodeperfmon
-              cat << EOF > ./backup.sh
-              #!/bin/bash
-              tar -cvzf /tmp/AKS_backup.tgz /var/log/journal /var/log/azure-vnet* 
+              #git clone https://github.com/OvidiuBorlean/nodeperfmon
+              cat << EOF > ./nodeperfmon.py
+              #pip3 install azure.storage.blob
+              from azure.storage.fileshare import ShareFileClient
+              from os.path import exists
+              from datetime import datetime
+              import requests
+              import os
+              import subprocess as sp
+              import socket
+              import time
+              import psutil
+              if 'CONN_STR' in os.environ:
+                  conn_str = os.environ.get('CONN_STR')
+              else:
+                  print ("Azure Storage - Connection String Not found in Environment. Please add one to upload report")
+              def upload(fileName):
+                now = datetime.now()
+                # Getting current date/time from environment
+                dt_string = now.strftime("%d-%m-%Y %H-%M-%S")
+                # Getting hostname of Node
+                hostName = sp.getoutput("hostname")
+                conn_str = os.environ.get('CONN_STR')
+                file_client = ShareFileClient.from_connection_string(conn_str=conn_str, share_name="logs", file_path=hostName)
+                with open(fileName, "rb") as source_file:
+                  file_client.upload_file(source_file)
+                  print("Done Uploading")
+                  time.sleep(1)
+              def node_backup():
+                backupLogs = sp.getoutput("tar -cvzf /tmp/akslogs.tgz /var/log/journal /var/log/azure-vnet* /tmp/aksreport /var/log/containers /var/log/syslog /var/log/*.log")
+                print(backupLogs)
+              def perfmon():
+                CPU_check = psutil.cpu_percent(5)
+                print("CPU Load: ", CPU_check)
+                mem_check = psutil.virtual_memory()[2]
+                print("Memory Load: ", mem_check)
+                if CPU_check > float(CPU_MAX) or mem_check > float(MEM_MAX):
+                    #print("Performance Alert Triggered")
+                    cpu_report = sp.getoutput("top -b -n 1")
+                    time.sleep(1)
+                    # Getting the free memory from Linux host
+                    mem_report = sp.getoutput("free -h")
+                    time.sleep(1)
+                    # Getting last 10 min logs from Journal
+                    journal = sp.getoutput('journalctl --since "10 min ago"')
+                    # Creating report file and adding the previous commands output
+                    with open("/tmp/aksreport", "a") as f:
+                      f.write(cpu_report)
+                      f.write("\n")
+                      f.write("\n")
+                      f.write(mem_report)
+                      f.write("\n")
+                      f.write(journal)
+                      f.close()
+                    return 1
+                else:
+                  return 0    
+              def network_check(host, port):
+                settings = {}
+                ports = [port]
+                settings["timeout"] = 5
+                #settings["port"] = 1192
+                connected = False
+                for n in ports:
+                  try:
+                    tsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    tsock.settimeout(settings['timeout'])
+                    print("Checking connectivity to host/port: ", host, "/", n)
+                    tsock.connect((host, n))
+                    connected = True
+                    #print("Success")
+                    tsock.shutdown(socket.SHUT_RDWR)
+                    tsock.close()
+                    time.sleep(1)
+                  except ConnectionRefusedError:
+                    print('Conenction Refused')
+                    time.sleep(1)
+                  except:
+                    print("Network Failure")
+                if not connected:
+                  #print("Generate Report")
+                  #node_backup()
+                  return 0
+                else:
+                  return 1
+              if __name__ == '__main__':
+                if 'NODE_BACKUP' in os.environ:
+                  NODE_BACKUP = os.environ.get('NODE_BACKUP')
+                  if NODE_BACKUP == "True":
+                    print ("Executing only backup of Nodes")
+                    node_backup()
+                    upload("/tmp/akslogs.tgz")
+                    exit()
+                if 'GLOBAL_DELAY' in os.environ:
+                  GLOBAL_DELAY = os.environ.get('GLOBAL_DELAY')
+                else:
+                  GLOBAL_DELAY = 10
+                if 'CPU_MAX' in os.environ:
+                  CPU_MAX = os.environ.get('CPU_MAX')
+                else:
+                  CPU_MAX = float(95)
+                if 'MEM_MAX' in os.environ:
+                  MEM_MAX = os.environ.get('MEM_MAX')
+                else:
+                  MEM_MAX = float(95)
+                print ("Starting Monitor")
+                if 'RUN_FOR' in os.environ:
+                  RUN_FOR = os.environ.get('RUN_FOR')
+                else:
+                  RUN_FOR = float(5)
+                t_end = time.time() + 60 * int(RUN_FOR)
+                up_flag = False
+                while time.time() < t_end:
+                  connectivity = network_check("127.0.0.1", 10250)
+                  if not connectivity:
+                    print("Connectivity Error, Starting Backup process")
+                    if not up_flag:
+                      node_backup()
+                      upload("/tmp/akslogs.tgz")
+                      up_flag = True
+                    else:
+                      print ("Logs alreadey uploaded")
+                  performance = perfmon()
+                  if performance:
+                    print ("Performance Alert ")
+                    print("Perf Block", up_flag)
+                    if not up_flag:
+                      node_backup()
+                      upload("/tmp/akslogs.tgz")
+                      up_flag = True
+                    else:
+                      print("Logs already uploaded")
+                  time.sleep(int(GLOBAL_DELAY))
               EOF
-              chmod +x ./backup.sh
               echo "Installing Python Libraries"
               apt update
               apt install python3-pip -y
               pip3 install azure-storage-file-share
               pip3 install psutil
               echo "Starting Monitoring"
-              python3 /tmp/nodeperfmon/fsnodeperfmon.py
+              python3 /tmp/nodeperfmon.py
               sleep 600
           image: alpine
           env:
@@ -54,8 +181,11 @@ spec:
           - name: CPU_MAX
             value: "85"
           - name: MEM_MAX
-            value: "5"
-          
+            value: "95"
+          - name: RUN_FOR
+            value: "15"
+          - name: NODE_BACKUP
+            value: "False"           
           imagePullPolicy: IfNotPresent
           name: disable-node-exporter-service
           resources:

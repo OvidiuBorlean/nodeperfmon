@@ -14,8 +14,8 @@ def init_report():
   if 'CONN_STR' in os.environ:
     CONN_STR = os.environ.get('CONN_STR')
   else:
-    print ("Azure Storage - Connection String Not found in Environment. Please add to upload report.. Using default")
-    CONN_STR = "your connection string"
+    CONN_STR = "Customer Connextion String"
+    print ("Azure Storage - Connection String Not found in Environment. Please add to upload report")
   now = datetime.now()
   # Getting current date/time from environment
   dt_string = now.strftime("%d-%m-%Y %H:%M:%S")
@@ -32,7 +32,7 @@ def init_report():
   # Getting last 10 min logs from Journal
   journal = sp.getoutput('journalctl --since "10 min ago"')
   # Creating report file and adding the previous commands output
-  with open("/tmp/aksreport", "w") as f:
+  with open("/tmp/aksreport", "a") as f:
     f.write(cpu_report)
     f.write("\n")
     f.write("------------------------------------------")
@@ -99,22 +99,23 @@ if __name__ == '__main__':
 
   if 'GLOBAL_DELAY' in os.environ:
     GLOBAL_DELAY = os.environ.get('GLOBAL_DELAY')
+    logs.write(GLOBAL_DELAY)
   else:
     GLOBAL_DELAY = 10
 
   if 'CPU_MAX' in os.environ:
     CPU_MAX = os.environ.get('CPU_MAX')
+    logs.write(CPU_MAX)
   else:
     CPU_MAX = float(90)
 
   if 'MEM_MAX' in os.environ:
     MEM_MAX = os.environ.get('MEM_MAX')
+    logs.write(MEM_MAX)
   else:
     MEM_MAX = float(3)
-
   print ("Starting Monitor")
-  with open("/tmp/aksreport.logs", "a") as logs:
-    logs.write("Main Function")
+  logs.write("Main Function")
   while (True):
     network_check("127.0.0.1", 10250)
     perfmon()
