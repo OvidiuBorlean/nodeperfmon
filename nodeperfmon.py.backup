@@ -38,7 +38,7 @@ def init_report():
     
   now = datetime.now()
   dt_string = now.strftime("%d-%m-%Y %H:%M:%S")
-  connect_str = "DefaultEndpointsProtocol=https;AccountName=ovidiuborlean;AccountKey=AC1I4s5AIZ5yazBxMblFOr0nFapLRgBjKcoSjXzvvTcvnxIXBNpFOti1DWZ/aXDAIDEAej563AMC+AStbfEIpw==;EndpointSuffix=core.windows.net"
+  connect_str = ""
   blob_service_client = BlobServiceClient.from_connection_string(connect_str)
   blob_client = blob_service_client.get_blob_client(container="logs", blob=dt_string)
   with open("/tmp/aksreport", "rb") as data:
