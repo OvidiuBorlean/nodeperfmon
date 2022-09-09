@@ -15,14 +15,14 @@ import socket
 import time
 import psutil
 
-#storage_accout = "https://ovidiuborlean.file.core.windows.net/"
-#account_key = "geS8Pi70WAY9BIiX/ii4ubZxh7YPw3JIslvWT7TtIuWy7I9dAeqOhCLRhy0SBmzbfbhMLnDY3xIV+ASttmtYCA=="
+#storage_accout = ""
+#account_key = ""
 
 if 'CONN_STR' in os.environ:
     conn_str = os.environ.get('CONN_STR')
 else:
     print ("Azure Storage - Connection String Not found in Environment. Please add to upload report")
-    #conn_str = "DefaultEndpointsProtocol=https;AccountName=ovidiuborlean;AccountKey=geS8Pi70WAY9BIiX/ii4ubZxh7YPw3JIslvWT7TtIuWy7I9dAeqOhCLRhy0SBmzbfbhMLnDY3xIV+ASttmtYCA==;EndpointSuffix=core.windows.net"
+    #conn_str = ""
 
 def upload(fileName):
   now = datetime.now()
