@@ -14,9 +14,9 @@ import subprocess as sp
 import socket
 import time
  
-storage_accout = "https://ovidiuborlean.file.core.windows.net/"
-account_key = "geS8Pi70WAY9BIiX/ii4ubZxh7YPw3JIslvWT7TtIuWy7I9dAeqOhCLRhy0SBmzbfbhMLnDY3xIV+ASttmtYCA=="
-conn_str = "DefaultEndpointsProtocol=https;AccountName=ovidiuborlean;AccountKey=geS8Pi70WAY9BIiX/ii4ubZxh7YPw3JIslvWT7TtIuWy7I9dAeqOhCLRhy0SBmzbfbhMLnDY3xIV+ASttmtYCA==;EndpointSuffix=core.windows.net"
+storage_accout = ""
+account_key = ""
+conn_str = ""
 
 is_uploaded = False
 
