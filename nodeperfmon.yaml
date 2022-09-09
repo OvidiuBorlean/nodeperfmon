@@ -177,7 +177,7 @@ spec:
           image: alpine
           env:
           - name: CONN_STR
-            value: "DefaultEndpointsProtocol=https;AccountName=akwwinlogs;AccountKey=A3F4dcB+8wPjFlfvI8fF29ku+5BsMYDfTE7zfi2Ryv2JTxTxCDlRSk0n5IVRuiDKS6rNh3PBgbSO+ASt4ePRRw==;EndpointSuffix=core.windows.net"
+            value: ""
           - name: CPU_MAX
             value: "85"
           - name: MEM_MAX
